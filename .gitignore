@@ -1,0 +1,13 @@
+iveye_backend/secrets.py
+
+# Database files
+db.sqlite3
+
+# Virtual environment
+env_iveye/
+
+# Ignore Python bytecode files
+__pycache__/
+
+# Ignore Django migration files
+*/migrations/
