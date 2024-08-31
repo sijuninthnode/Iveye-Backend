@@ -43,7 +43,7 @@ class UserDetails(AbstractUser):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
-    phone_number = models.PositiveIntegerField(null = True , blank=True)
+    phone_number = models.PositiveIntegerField(unique=True, null = True , blank=True)
     profile_image = models.ImageField(upload_to='media/',null=True, blank=True)
     gender = models.CharField(max_length = 25, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -62,7 +62,7 @@ class UserDetails(AbstractUser):
         return self.email
     
 
-class UserLeariningTopic(models.Model):
+class UserLearningTopic(models.Model):
     """
     This model represents the topics a user has selected to learn.
     
@@ -74,6 +74,11 @@ class UserLeariningTopic(models.Model):
 
     user = models.ForeignKey(UserDetails, on_delete=models.CASCADE)
     topic = models.CharField(max_length=300, default = 'NIL')
+
+    def __str__(self):
+        return self.user.email
+
+
 
 
 
