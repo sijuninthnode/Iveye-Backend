@@ -60,6 +60,20 @@ class UserDetails(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+
+class UserLeariningTopic(models.Model):
+    """
+    This model represents the topics a user has selected to learn.
+    
+    Fields:
+    - user : A ForeignKey to the UserDetails model, representing the user who selected the topics.
+    - topic: A CharField that holds the name of the learning topic chosen by the user,
+             with a maximum length of 300 characters. The default value is 'NIL'.
+    """
+
+    user = models.ForeignKey(UserDetails, on_delete=models.CASCADE)
+    topic = models.CharField(max_length=300, default = 'NIL')
 
 
 

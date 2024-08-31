@@ -11,43 +11,66 @@ from userapp.models import UserDetails
 
 
 
-class UserRegistration(APIView):
+class UserRegistrationView(APIView):
     """
-    Used to register the user
-    fields: first_name, Last_name, password, phone_number.
+    This view handles user registration.
+
+    Fields:
+    - first_name: The first name of the user.
+    - last_name: The last name of the user.
+    - password: The user's password.
+    - phone_number: The user's phone number.
+    - email: The user's email address (should be unique).
+
+    Functionality:
+    - Validates that the required fields are provided and not left blank.
+    - Checks if an account already exists with the provided email or phone number.
+    - If validation passes, creates a new user account and returns a success message.
+    - Returns appropriate error messages if validation fails or if an account already exists.
     """
 
     def post(self, request):
-
-        #The required fields should not be blank and should check in the fronendend itself.
+        # The required fields should not be blank and should be validated on the frontend as well.
         data = request.data
         email = request.data.get('email')
         phone_number = request.data.get('phone_number')
-        if UserDetails.objects.filter(email = email). exists():
-            return Response({'message' : "An account already exists with this email id"}
-                            ,status=status.HTTP_400_BAD_REQUEST)
-        if UserDetails.objects.filter(phone_number = phone_number). exists():
-            return Response({'message' : "An account already exists with this Phone number"}
-                            ,status=status.HTTP_201_CREATED)
-        serialised_data = UserDetailsSerializer(data = data)
-        if serialised_data.is_valid():
-            serialised_data.save()
-            return Response({'message' : "Account created successfully"}
-                            ,status=status.HTTP_201_CREATED)
+
+        # Check if a user with the same email already exists
+        if UserDetails.objects.filter(email=email).exists():
+            return Response({'message': "An account already exists with this email id"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if a user with the same phone number already exists
+        if UserDetails.objects.filter(phone_number=phone_number).exists():
+            return Response({'message': "An account already exists with this phone number"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        # Serialize and validate the provided data
+        serialized_data = UserDetailsSerializer(data=data)
+        if serialized_data.is_valid():
+            serialized_data.save()
+            return Response({'message': "Account created successfully"},
+                            status=status.HTTP_201_CREATED)
         else:
-            return Response({'message' : "Please check the entered details", "error" : serialised_data.errors}
-                            ,status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': "Please check the entered details", "errors": serialized_data.errors},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
-    This view is used for authication of the user.
+    This view is used for user authentication by obtaining a pair of JWT tokens (access and refresh).
+
+    It leverages a custom serializer, `CustomTokenObtainPairSerializer`, to handle the token creation process.
+
+    Methods:
+    - POST: Authenticates the user with provided credentials and returns a pair of JWT tokens (access and refresh) if successful.
     """
 
     serializer_class = CustomTokenObtainPairSerializer
 
+
 #Incomplete : email
-class ForgotPasswordEmailRequest(APIView):
+class ForgotPasswordEmailRequestView(APIView):
     """
     This is used to check whether the user entered email exists
     and also  generate an OTP to the email.
@@ -57,7 +80,7 @@ class ForgotPasswordEmailRequest(APIView):
         email = request.data.get('email')
 
         #Confirming that there is an account registred with entred email
-        if UserDetails.objects.filter(emai = email). exists():
+        if UserDetails.objects.filter(email = email). exists():
             
             #activating the email smtp to generate the OTP
             #1.Storing the OTP as a Data in DB
@@ -75,10 +98,12 @@ class ForgotPasswordEmailRequest(APIView):
                             , status=status.HTTP_400_BAD_REQUEST)
 
 
-class ForgotPasswordEmailConfirmation(APIView):  
+class ForgotPasswordEmailConfirmationView(APIView):  
     """
-    This view is used to change the password 
-    if the OTP entered by the user is correct.
+    This view is used to change the password if the OTP entered by the user is correct.
+    Methods:
+    - Post
+
     """
 
     def post(self, request):
@@ -101,16 +126,31 @@ class ForgotPasswordEmailConfirmation(APIView):
 
 class UserProfileView(APIView):
     """
-    This view is used to get profile details of the current logged in  user.
+    This view is used to retrieve the profile details of the currently logged-in user.
+
+    Authentication:
+    - Requires the user to be authenticated (IsAuthenticated).
+
+    Methods:
+    - GET: Fetches the profile details of the authenticated user. Returns a 200 OK status with the user's data if found.
+    - If the user does not exist, returns a 404 Not Found status with an error message.
     """
 
     permission_classes = [IsAuthenticated] 
 
     def get(self, request):
         try:
-            user_data = UserDetails.objects.get(id = request.user.id)
+            user_data = UserDetails.objects.get(id=request.user.id)
             serialized_data = UserDetailsSerializer(user_data)
             return Response(serialized_data.data, status=status.HTTP_200_OK)
         except UserDetails.DoesNotExist:
-            return Response({'message' : 'User does not exists','error' : serialized_data.errors }, status= status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'User does not exist', 'error': 'User data not found'}
+                            , status=status.HTTP_404_NOT_FOUND)
+
+  
+
+
+class UserLeariningTopicCreationView(APIView):
         
+        def get(self, request):
+            pass
