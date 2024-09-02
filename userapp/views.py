@@ -6,8 +6,9 @@ from rest_framework import status, generics
 from rest_framework.views import APIView
 import random
 
-from .serializers import (UserDetailsSerializer, CustomTokenObtainPairSerializer, UserLearningTopicSerializer)
-from userapp.models import (UserDetails, UserLearningTopic)
+from .serializers import (UserDetailsSerializer, CustomTokenObtainPairSerializer, UserLearningTopicSerializer,
+                           UserCreatedLessonsSerializer)
+from userapp.models import (UserDetails, UserLearningTopic, UserCreatedLessons)
 
 
 
@@ -228,7 +229,7 @@ class DeleteUserTopicsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request, topic_id):
+    def delete(self, request, topic_id):
         try:
             topic = UserLearningTopic.objects.get(id=topic_id)
             topic.delete()
@@ -268,8 +269,84 @@ class UpdateUserProfileView(APIView):
         except UserDetails.DoesNotExist:
             return Response({"message": "User not found"}
                             , status=status.HTTP_404_NOT_FOUND)
+        
 
+class UserAddYourOwnLessonView(APIView):
+    """
+    This view allows a user to create, add, and delete custom lessons.
 
+    Authentication:
+    - Requires the user to be authenticated (IsAuthenticated).
+
+    Methods:
+    - POST: 
+        - Description: Creates a new custom lesson for the authenticated user.
+        - Request Data: 
+            - `lesson_name` (str): The name of the lesson the user wants to create.
+        - Responses:
+            - 201 Created: Returns a success message if the lesson is successfully created.
+            - 404 Not Found: Returns an error message if the user is not found.
+
+    - DELETE: 
+        - Description: Deletes a custom lesson created by the user.
+        - Path Parameter: 
+            - `user_lesson_id` (int): The ID of the lesson to be deleted.
+        - Responses:
+            - 200 OK: Returns a success message if the lesson is successfully deleted.
+            - 400 Bad Request: Returns an error message if the lesson is not found or the deletion cannot be completed.
+    """
+    
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        email = request.user.email
+        lesson = request.data.get('lesson_name')
+        try:
+            user = UserDetails.objects.get(email=email)
+            UserCreatedLessons.objects.create(user= user, lesson_name=lesson)
+            return Response({'message': 'Your custom lesson added successfully'}
+                                , status=status.HTTP_201_CREATED)
+        except UserDetails.DoesNotExist:
+            return Response({"message": "User not found"}
+                            , status=status.HTTP_404_NOT_FOUND)
+        
+    def delete(self, request, user_lesson_id):
+        try:
+            UserCreatedLessons.objects.get(id = user_lesson_id).delete()
+            return Response({'message': 'Your custom lesson deleted successfully'}
+                                , status=status.HTTP_200_OK)
+        except UserCreatedLessons.DoesNotExist: 
+            return Response({"message": "Action can't be completed"}
+                            , status=status.HTTP_400_BAD_REQUEST)
+
+        
+class GetAllUserSpecificCustomLesson(APIView):
+    """
+    This view retrieves all custom lessons created by the authenticated user.
+
+    Authentication:
+    - Requires the user to be authenticated (IsAuthenticated).
+
+    Methods:
+    - GET: Fetches and returns a list of all custom lessons created by the user.
+           Returns a 404 error if the user is not found.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        email = request.user.email
+        try:
+            data =UserCreatedLessons.objects.filter(user__email = email)
+            serializer = UserCreatedLessonsSerializer(data, many = True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except UserCreatedLessons.DoesNotExist:
+            return Response({"message": "User not found"}
+                            , status=status.HTTP_404_NOT_FOUND)
+        
+
+         
+        
 
 
 

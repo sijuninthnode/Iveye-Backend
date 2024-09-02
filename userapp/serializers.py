@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from userapp.models import (UserDetails, UserLearningTopic)
+from userapp.models import (UserDetails, UserLearningTopic, UserCreatedLessons)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -38,3 +38,8 @@ class UserLearningTopicSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = UserDetails
 #         fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'profile_image', 'gender', 'topics']
+
+class UserCreatedLessonsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserCreatedLessons
+        fields = ['lesson_name']

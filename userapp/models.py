@@ -77,6 +77,19 @@ class UserLearningTopic(models.Model):
 
     def __str__(self):
         return self.user.email
+    
+
+class UserCreatedLessons(models.Model):
+    """
+    This model represents the lessons created by the user.
+
+    Fields:
+    - user: A ForeignKey to the UserDetails model, representing the user who created the lesson.
+    - lesson_name: A CharField to store the name of the lesson, with a maximum length of 350 characters.
+    """
+
+    user = models.ForeignKey(UserDetails, on_delete= models.CASCADE)
+    lesson_name = models.CharField(max_length=350,default='NIL')
 
 
 
