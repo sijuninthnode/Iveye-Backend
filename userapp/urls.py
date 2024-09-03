@@ -9,13 +9,13 @@ urlpatterns = [
 
     #REGISTRATION
     # To create an account for the user (Registration)
-    path('create/account/', UserRegistrationView.as_view(), name='user_registration'),
+    path('create/account', UserRegistrationView.as_view(), name='user_registration'),
 
     # LOGIN
     # API to refresh the JWT token
-    path('login/refresh-token/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('login/refresh-token', TokenRefreshView.as_view(), name='token_refresh'),
     # API to log in the user using simple-JWT
-    path('login/', TokenObtainPairView.as_view(), name='user_login'),
+    path('login', TokenObtainPairView.as_view(), name='user_login'),
 
 
     # TOPICS
